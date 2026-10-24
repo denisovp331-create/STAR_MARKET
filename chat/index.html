@@ -118,7 +118,7 @@ function renderChannel(channel){
  if(!all.length){const note=document.createElement('div');note.className='empty';note.textContent='Пока здесь тихо. Начни разговор первым!';msgs.append(note)}
  all.forEach(m=>addMessage(m[0],m[1],m[2],false));
  if((channelData[channel]||{}).voice){const note=document.createElement('div');note.className='system-note';note.textContent='Нажми «Подключиться», чтобы войти в голосовой канал. Нужен аккаунт STAR CHAT.';msgs.append(note)}
- $('voicePanel').classList.toggle('show',!!(channelData[channel]||{}).voice);
+ $('voicePanel').classList.toggle('show',!!(channelData[channel]||{}).voice || !!voiceRoom);
  if((channelData[channel]||{}).voice && voiceRoom && voiceRoom.id!==voiceRoomIds[channel]) leaveVoice(false);
 
  msgs.scrollTop=msgs.scrollHeight;
@@ -268,7 +268,11 @@ async function enableVideo(){
  try{
   const stream=await navigator.mediaDevices.getUserMedia({video:true});
   const track=stream.getVideoTracks()[0];localStream.addTrack(track);$('localVideo').srcObject=new MediaStream([track]);$('localVideo').style.display='block';
-  for(const pc of peers.values()){const sender=pc.getSenders().find(s=>s.track?.kind==='video');if(sender)await sender.replaceTrack(track);else pc.addTrack(track,localStream)}
+  for(const [peerId,pc] of peers.entries()){
+   const sender=pc.getSenders().find(s=>s.track?.kind==='video');
+   if(sender)await sender.replaceTrack(track);else pc.addTrack(track,localStream);
+   if(pc.signalingState==='stable'){const offer=await pc.createOffer();await pc.setLocalDescription(offer);await sendSignal('offer',peerId,{description:pc.localDescription})}
+  }
   voiceKind='video';$('voiceVideo').textContent='📹 Камера включена';toast('Камера включена');
  }catch(e){toast('Не удалось включить камеру: '+e.message)}
 }
