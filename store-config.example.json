@@ -1,0 +1,15 @@
+{
+  "storeName": "STAR MARKET",
+  "currency": "RUB",
+  "paymentMode": "manual",
+  "deliveryMode": "manual",
+  "supportContact": "",
+  "pricesAreDemo": true,
+  "packages": [
+    { "stars": 50, "price": 79 },
+    { "stars": 100, "price": 149 },
+    { "stars": 250, "price": 369 },
+    { "stars": 500, "price": 729 },
+    { "stars": 1000, "price": 1399 }
+  ]
+}
