@@ -72,7 +72,7 @@ body{background:radial-gradient(ellipse at 70% -20%,#3b235c 0,transparent 48%),v
 </aside>
 </div>
 <div class="toast" id="toast" role="status"></div>
-<div class="auth-backdrop" id="authBackdrop"><div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle"><h2 id="authTitle">Вход в STAR CHAT</h2><p>Войди или создай аккаунт, чтобы подключаться к звонкам с другими участниками.</p><label for="authEmail">Электронная почта</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"><label for="authPassword">Пароль (минимум 6 символов)</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Пароль"><label for="authUsername">Никнейм</label><input id="authUsername" maxlength="32" autocomplete="nickname" placeholder="Например, malo1w"><div class="auth-status" id="authStatus"></div><div class="auth-actions"><button id="authCancel">Закрыть</button><button id="authSignIn" class="primary">Войти</button><button id="authSignUp">Создать аккаунт</button><button id="authSignOut" style="display:none">Выйти</button></div></div></div>
+<div class="auth-backdrop" id="authBackdrop"><div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle"><h2 id="authTitle">Вход в STAR CHAT</h2><p>Войди или создай аккаунт, чтобы подключаться к звонкам с другими участниками.</p><div id="telegramLoginWrap" style="margin:20px 0;min-height:44px;display:flex;justify-content:center"><script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="StarChatLoginBot" data-size="large" data-radius="8" data-onauth="onTelegramAuth(user)" data-request-access="write"></script></div><div class="auth-status" id="authStatus"></div><div class="auth-actions"><button id="authCancel">Закрыть</button><button id="authSignOut" style="display:none">Выйти из аккаунта</button></div></div></div>
 <div class="modal-backdrop" id="profileBackdrop"><div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileTitle"><h2 id="profileTitle">Настройка профиля</h2><p>Настрой свой профиль STAR CHAT — имя, ник, описание и аватар.</p><div class="profile-preview"><div class="avatar" id="profilePreviewAvatar">M</div><div><strong id="profilePreviewName">malo1w</strong><div style="font-size:12px;color:#c0b5d2" id="profilePreviewStatus">В сети</div></div></div><label for="editDisplayName">Отображаемое имя</label><input id="editDisplayName" maxlength="40" placeholder="Как тебя будут видеть"><label for="editUsername">Уникальный никнейм</label><input id="editUsername" maxlength="32" placeholder="malo1w"><label for="editBio">О себе</label><textarea id="editBio" maxlength="300" placeholder="Расскажи о себе, любимых играх и команде..."></textarea><label for="editStatus">Статус</label><input id="editStatus" maxlength="80" placeholder="Например: играю в Rivals 🎮"><label for="editAvatar">Аватарка (PNG, JPG, WEBP или GIF; до 5 МБ)</label><input id="editAvatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><div class="profile-status" id="profileStatus"></div><div class="profile-actions"><button id="profileCancel">Отмена</button><button id="profileSave" class="primary">Сохранить профиль</button></div></div></div><div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><h2 id="modalTitle">Создать</h2><p id="modalText">Настрой свой сервер.</p><input id="modalInput" maxlength="40" placeholder="Название"><div class="modal-actions"><button id="cancelModal">Отмена</button><button class="primary" id="confirmModal">Создать</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -156,8 +156,8 @@ $('mic').onclick=async()=>{if(!localStream){toast('Сначала подключ
 $('authOpen').onclick=()=>showAuth();
 $('authCancel').onclick=()=>$('authBackdrop').classList.remove('show');
 $('authBackdrop').onclick=e=>{if(e.target===$('authBackdrop'))$('authBackdrop').classList.remove('show')};
-$('authSignIn').onclick=()=>authenticate(false);
-$('authSignUp').onclick=()=>authenticate(true);
+
+
 $('authSignOut').onclick=async()=>{await leaveVoice(false);await db.auth.signOut();toast('Ты вышел из аккаунта')};
 $('voiceJoin').onclick=()=>joinVoice(voiceRoomIds[currentChannel]||callParam,'audio');
 $('voiceMute').onclick=()=>toggleMic();
@@ -174,22 +174,28 @@ $('videoCall').onclick=async()=>{
 };
 db.auth.onAuthStateChange((_event,session)=>{authUser=session?.user||null;updateAuthUi();if(authUser)loadProfile()});
 async function initAuth(){const {data}=await db.auth.getSession();authUser=data.session?.user||null;updateAuthUi();if(authUser)await loadProfile()}
-function showAuth(){ $('authStatus').textContent='';$('authBackdrop').classList.add('show');$('authSignOut').style.display=authUser?'inline-block':'none';if(authUser){$('authEmail').value=authUser.email||'';$('authEmail').disabled=true;$('authPassword').style.display='none';$('authUsername').style.display='none';$('authSignIn').style.display='none';$('authSignUp').style.display='none';$('authTitle').textContent='Аккаунт подключён'}else{$('authEmail').disabled=false;$('authPassword').style.display='block';$('authUsername').style.display='block';$('authSignIn').style.display='inline-block';$('authSignUp').style.display='inline-block';$('authTitle').textContent='Вход в STAR CHAT'}}
-async function authenticate(signUp){
- const email=$('authEmail').value.trim(),password=$('authPassword').value,username=($('authUsername').value.trim()||email.split('@')[0]).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32);
+function showAuth(){
  $('authStatus').textContent='';
- if(!email||password.length<6){$('authStatus').textContent='Укажи почту и пароль не короче 6 символов.';return}
- const result=signUp?await db.auth.signUp({email,password,options:{data:{username}}}):await db.auth.signInWithPassword({email,password});
- if(result.error){$('authStatus').textContent=result.error.message;return}
- if(signUp&&!result.data.session){$('authStatus').textContent='Проверь почту и подтверди регистрацию. Если письмо не пришло, проверь настройки Auth проекта.';return}
- authUser=result.data.user||result.data.session?.user||null;
- if(authUser){
-   const {error:profileError}=await db.from('chat_profiles').upsert({id:authUser.id,username:username||'player_'+authUser.id.slice(0,6),display_name:username||'Player'});
-   if(profileError && !/duplicate|unique/i.test(profileError.message)) console.warn('Profile:',profileError.message);
-   $('profileName').textContent=username||authUser.email?.split('@')[0]||'Player';
-   $('authBackdrop').classList.remove('show');updateAuthUi();await loadProfile();toast(signUp?'Аккаунт создан':'Вход выполнен');
- }
+ $('authBackdrop').classList.add('show');
+ $('authSignOut').style.display=authUser?'inline-block':'none';
+ $('telegramLoginWrap').style.display=authUser?'none':'flex';
+ $('authTitle').textContent=authUser?'Аккаунт подключён':'Вход в STAR CHAT через Telegram';
 }
+window.onTelegramAuth=async function(telegramUser){
+ $('authStatus').textContent='Проверяем вход через Telegram…';
+ try{
+  const response=await fetch(SUPABASE_URL+'/functions/v1/telegram-auth',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({user:telegramUser})});
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Не удалось войти через Telegram.');
+  const {error}=await db.auth.setSession({access_token:result.session.access_token,refresh_token:result.session.refresh_token});
+  if(error)throw error;
+  authUser=result.user;
+  $('authBackdrop').classList.remove('show');
+  updateAuthUi();
+  await loadProfile();
+  toast('Вход через Telegram выполнен');
+ }catch(err){$('authStatus').textContent=err.message||'Ошибка входа через Telegram.'}
+};
 function updateAuthUi(){
  const label=$('authLabel');if(label)label.textContent=authUser?(profileData.status||'В сети'):'Не вошёл';
  if($('authOpen'))$('authOpen').textContent=authUser?'●':'♙';
