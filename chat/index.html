@@ -72,7 +72,7 @@ body{background:radial-gradient(ellipse at 70% -20%,#3b235c 0,transparent 48%),v
 </aside>
 </div>
 <div class="toast" id="toast" role="status"></div>
-<div class="auth-backdrop" id="authBackdrop"><div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle"><h2 id="authTitle">Вход в STAR CHAT</h2><p>Войди или создай аккаунт, чтобы подключаться к звонкам с другими участниками.</p><div id="telegramLoginWrap" style="margin:20px 0;min-height:44px;display:flex;justify-content:center"><script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="StarChatLoginBot" data-size="large" data-radius="8" data-onauth="onTelegramAuth(user)" data-request-access="write"></script></div><div class="auth-status" id="authStatus"></div><div class="auth-actions"><button id="authCancel">Закрыть</button><button id="authSignOut" style="display:none">Выйти из аккаунта</button></div></div></div>
+<div class="auth-backdrop" id="authBackdrop"><div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle"><h2 id="authTitle">Вход в STAR CHAT</h2><p>Войди или создай аккаунт, чтобы подключаться к звонкам с другими участниками.</p><label for="authEmail">Электронная почта</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"><div id="emailCodeWrap" style="display:none"><label for="authCode">Шестизначный код из письма</label><input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456"></div><div class="auth-status" id="authStatus"></div><div class="auth-actions"><button id="authCancel">Закрыть</button><button id="sendEmailCode" class="primary">Получить код</button><button id="verifyEmailCode" class="primary" style="display:none">Подтвердить код</button><button id="authSignOut" style="display:none">Выйти из аккаунта</button></div></div></div>
 <div class="modal-backdrop" id="profileBackdrop"><div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileTitle"><h2 id="profileTitle">Настройка профиля</h2><p>Настрой свой профиль STAR CHAT — имя, ник, описание и аватар.</p><div class="profile-preview"><div class="avatar" id="profilePreviewAvatar">M</div><div><strong id="profilePreviewName">malo1w</strong><div style="font-size:12px;color:#c0b5d2" id="profilePreviewStatus">В сети</div></div></div><label for="editDisplayName">Отображаемое имя</label><input id="editDisplayName" maxlength="40" placeholder="Как тебя будут видеть"><label for="editUsername">Уникальный никнейм</label><input id="editUsername" maxlength="32" placeholder="malo1w"><label for="editBio">О себе</label><textarea id="editBio" maxlength="300" placeholder="Расскажи о себе, любимых играх и команде..."></textarea><label for="editStatus">Статус</label><input id="editStatus" maxlength="80" placeholder="Например: играю в Rivals 🎮"><label for="editAvatar">Аватарка (PNG, JPG, WEBP или GIF; до 5 МБ)</label><input id="editAvatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><div class="profile-status" id="profileStatus"></div><div class="profile-actions"><button id="profileCancel">Отмена</button><button id="profileSave" class="primary">Сохранить профиль</button></div></div></div><div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><h2 id="modalTitle">Создать</h2><p id="modalText">Настрой свой сервер.</p><input id="modalInput" maxlength="40" placeholder="Название"><div class="modal-actions"><button id="cancelModal">Отмена</button><button class="primary" id="confirmModal">Создать</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -158,7 +158,7 @@ $('authCancel').onclick=()=>$('authBackdrop').classList.remove('show');
 $('authBackdrop').onclick=e=>{if(e.target===$('authBackdrop'))$('authBackdrop').classList.remove('show')};
 
 
-$('authSignOut').onclick=async()=>{await leaveVoice(false);await db.auth.signOut();toast('Ты вышел из аккаунта')};
+$('authSignOut').onclick=async()=>{await leaveVoice(false);await db.auth.signOut();authUser=null;updateAuthUi();showAuth();toast('Ты вышел из аккаунта')};
 $('voiceJoin').onclick=()=>joinVoice(voiceRoomIds[currentChannel]||callParam,'audio');
 $('voiceMute').onclick=()=>toggleMic();
 $('voiceVideo').onclick=()=>enableVideo();
@@ -178,23 +178,48 @@ function showAuth(){
  $('authStatus').textContent='';
  $('authBackdrop').classList.add('show');
  $('authSignOut').style.display=authUser?'inline-block':'none';
- $('telegramLoginWrap').style.display=authUser?'none':'flex';
- $('authTitle').textContent=authUser?'Аккаунт подключён':'Вход в STAR CHAT через Telegram';
+ $('authEmail').style.display=authUser?'none':'block';
+ $('emailCodeWrap').style.display='none';
+ $('sendEmailCode').style.display=authUser?'none':'inline-block';
+ $('verifyEmailCode').style.display='none';
+ $('authTitle').textContent=authUser?'Аккаунт подключён':'Вход в STAR CHAT по почте';
 }
-window.onTelegramAuth=async function(telegramUser){
- $('authStatus').textContent='Проверяем вход через Telegram…';
+$('sendEmailCode').onclick=async()=>{
+ const email=$('authEmail').value.trim().toLowerCase();
+ $('authStatus').textContent='';
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ $('authStatus').textContent='Введи корректный адрес электронной почты.';return; }
+ const btn=$('sendEmailCode');btn.disabled=true;btn.textContent='Отправляем…';
  try{
-  const response=await fetch(SUPABASE_URL+'/functions/v1/telegram-auth',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({user:telegramUser})});
-  const result=await response.json();
-  if(!response.ok)throw new Error(result.error||'Не удалось войти через Telegram.');
-  const {error}=await db.auth.setSession({access_token:result.session.access_token,refresh_token:result.session.refresh_token});
+  const {error}=await db.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
   if(error)throw error;
-  authUser=result.user;
+  $('authEmail').dataset.pendingEmail=email;
+  $('authEmail').disabled=true;
+  $('emailCodeWrap').style.display='block';
+  $('verifyEmailCode').style.display='inline-block';
+  btn.textContent='Отправить код повторно';
+  $('authStatus').textContent='Код отправлен на '+email+'. Проверь также папку «Спам».';
+ }catch(err){$('authStatus').textContent=err.message||'Не удалось отправить код.';btn.textContent='Получить код'}
+ finally{btn.disabled=false}
+};
+$('verifyEmailCode').onclick=async()=>{
+ const email=$('authEmail').dataset.pendingEmail||$('authEmail').value.trim().toLowerCase();
+ const token=$('authCode').value.trim();
+ $('authStatus').textContent='';
+ if(!/^\d{6}$/.test(token)){ $('authStatus').textContent='Введи все 6 цифр из письма.';return; }
+ const btn=$('verifyEmailCode');btn.disabled=true;btn.textContent='Проверяем…';
+ try{
+  const {data,error}=await db.auth.verifyOtp({email,token,type:'email'});
+  if(error)throw error;
+  authUser=data.user||data.session?.user||null;
+  if(!authUser)throw new Error('Код принят, но аккаунт не найден. Попробуй ещё раз.');
+  const username=(email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||('player_'+authUser.id.slice(0,6)));
+  const {error:profileError}=await db.from('chat_profiles').upsert({id:authUser.id,username,display_name:username},{onConflict:'id'});
+  if(profileError)console.warn('Profile:',profileError.message);
   $('authBackdrop').classList.remove('show');
-  updateAuthUi();
-  await loadProfile();
-  toast('Вход через Telegram выполнен');
- }catch(err){$('authStatus').textContent=err.message||'Ошибка входа через Telegram.'}
+  $('authEmail').disabled=false;$('authEmail').value='';$('authEmail').dataset.pendingEmail='';$('authCode').value='';
+  updateAuthUi();await loadProfile();toast('Вход по коду выполнен');
+ }catch(err){$('authStatus').textContent=err.message||'Код не подошёл. Запроси новый и попробуй снова.'}
+ finally{btn.disabled=false;btn.textContent='Подтвердить код'}
 };
 function updateAuthUi(){
  const label=$('authLabel');if(label)label.textContent=authUser?(profileData.status||'В сети'):'Не вошёл';
