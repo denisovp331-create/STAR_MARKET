@@ -24,6 +24,18 @@ body{background:radial-gradient(ellipse at 70% -20%,#3b235c 0,transparent 48%),v
 .profile{cursor:pointer}.profile:hover{background:#281d39}.profile .avatar{overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}.profile-edit-hint{font-size:10px;color:#f4c542}
 .profile-card{width:min(480px,100%);max-height:90dvh;overflow:auto;background:#21182f;border:1px solid #60457d;border-radius:16px;padding:24px;box-shadow:0 25px 80px #000b}.profile-card h2{margin:0 0 5px}.profile-card p{font-size:13px;color:#c0b5d2}.profile-card label{display:block;color:#dfd1f0;font-size:12px;font-weight:800;margin-top:12px}.profile-card input,.profile-card textarea,.profile-card select{display:block;width:100%;background:#140f20;border:1px solid #4b3563;color:#fff9e9;border-radius:7px;padding:11px;margin-top:6px;font:inherit}.profile-card textarea{min-height:88px;resize:vertical}.profile-preview{display:flex;align-items:center;gap:14px;padding:12px;background:#2a203a;border-radius:10px}.profile-preview .avatar{width:64px;height:64px;font-size:22px}.profile-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:18px}.profile-actions button{padding:10px 14px;border-radius:7px;background:#39284e}.profile-actions .primary{background:linear-gradient(135deg,#a855f7,#6d28d9);color:#fff8db}.profile-status{font-size:12px;color:#f4c542;min-height:18px;margin-top:8px}
 
+
+/* STAR CHAT community update */
+.top-actions{gap:6px}.top-actions .icon-large{width:32px;height:34px;border-radius:8px}.top-actions .icon-large:hover{background:#38264d}
+.feature-banner{margin:10px 16px 14px;padding:14px 16px;border:1px solid #594077;border-radius:12px;background:linear-gradient(110deg,#35204d,#24172f 65%,#3a2a23);display:flex;align-items:center;gap:12px}
+.feature-banner .feature-icon{font-size:26px}.feature-banner strong{display:block;color:#ffe7a0}.feature-banner p{margin:3px 0 0;color:#cbbbdc;font-size:12px}.feature-banner button{margin-left:auto;background:#8b5cf6;padding:8px 11px;border-radius:8px;font-weight:700;white-space:nowrap}
+.message-tools{display:flex;gap:6px;align-items:center;margin-top:7px;flex-wrap:wrap}.reaction-btn,.reply-btn,.copy-btn{border:1px solid #58416f;background:#2c203b;color:#e9dafa;border-radius:7px;padding:4px 8px;font-size:12px}.reaction-btn:hover,.reply-btn:hover,.copy-btn:hover{background:#50326f}.reaction-btn.active{border-color:#f4c542;background:#493a2b;color:#ffe7a0}
+.search-backdrop{position:fixed;inset:0;z-index:50;background:#08050dcc;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 20px}.search-backdrop.show{display:flex}.search-box{width:min(620px,100%);background:#21182f;border:1px solid #74549a;border-radius:14px;padding:18px;box-shadow:0 30px 90px #000b}.search-box h2{margin:0 0 12px;font-size:18px}.search-box input{width:100%;padding:13px;border-radius:8px;border:1px solid #60457d;background:#140f20;color:#fff}.search-results{max-height:45vh;overflow:auto;margin-top:12px}.search-result{padding:10px;border-radius:8px;color:#e9def8;border-bottom:1px solid #39284e}.search-result small{display:block;color:#bca9d2;margin-bottom:3px}
+.dm-card{margin:12px 16px;padding:18px;border:1px solid #58406f;border-radius:12px;background:#261a36}.dm-card h3{margin:0 0 6px;color:#ffe7a0}.dm-card p{margin:0;color:#cbbbdc;font-size:13px}
+body.light-mode{--bg:#f3effa;--text:#241735;--muted:#655a74;background:#f3effa;color:#241735}
+body.light-mode .main,body.light-mode .topbar{background:#f7f3ff;color:#241735}body.light-mode .channels,body.light-mode .members{background:#e8dff4}body.light-mode .composer{background:#e6dbee}body.light-mode .composer textarea{color:#241735}body.light-mode .welcome h1{color:#241735}body.light-mode .message:hover{background:#e9e0f4}body.light-mode .profile{background:#ded2ed}body.light-mode .topic{color:#655a74}
+@media(max-width:650px){.feature-banner{margin:8px;padding:12px}.feature-banner button{padding:7px;font-size:11px}.top-actions{gap:1px}.top-actions .icon-large{width:27px;font-size:16px}.topic{display:none}}
+
 </style>
 </head>
 <body>
@@ -42,16 +54,20 @@ body{background:radial-gradient(ellipse at 70% -20%,#3b235c 0,transparent 48%),v
 <button class="channel" data-channel="знакомства"><span class="hash">#</span> знакомства</button>
 <button class="channel" data-channel="мемы"><span class="hash">#</span> мемы-и-клипы</button>
 <button class="channel" data-channel="объявления"><span class="hash">#</span> объявления</button>
+<button class="channel" data-channel="поиск-команды"><span class="hash">#</span> поиск-команды</button>
+<button class="channel" data-channel="турниры"><span class="hash">#</span> турниры</button>
 <div class="category voice">ГОЛОСОВЫЕ КАНАЛЫ</div>
-<button class="channel" data-channel="Лобби" data-voice="true"><span>🔊</span> Лобби</button>
+<button class="channel" data-channel="Лобби" data-voice="true"><span>🔊</span> Лобби <span class="voice-pill">2</span></button>
 <button class="channel" data-channel="Игровой отряд" data-voice="true"><span>🔊</span> Игровой отряд</button>
+<div class="category">ЛИЧНОЕ</div>
+<button class="channel" id="openDm"><span>✉</span> Личные сообщения</button>
 </div>
 <div class="profile" id="profileOpen" title="Открыть настройки профиля"><div class="avatar" id="profileAvatar">M</div><div style="min-width:0"><div class="name" id="profileName">malo1w</div><small id="authLabel">Не вошёл</small><small class="profile-edit-hint">Изменить профиль</small></div><div class="profile-actions"><button class="iconbtn" id="mic" title="Микрофон">🎙</button><button class="iconbtn" id="settings" title="Настроить профиль">⚙</button></div></div>
 </aside>
 <main class="main">
-<header class="topbar"><button class="icon-large mobile-menu" id="mobileMenu" aria-label="Открыть каналы">☰</button><span class="hash">#</span><strong id="channelTitle">общий</strong><span class="topic" id="topic">Общайся, играй и находи свою команду.</span><div class="top-actions"><button class="icon-large" id="authOpen" title="Войти или зарегистрироваться">♙</button><button class="icon-large" id="videoCall" title="Создать или открыть видеозвонок">📹</button><button class="icon-large" id="threads" title="Обсуждения">▤</button><button class="icon-large" id="toggleMembers" title="Участники">♙</button><button class="icon-large" id="invite" title="Пригласить">＋</button></div></header>
+<header class="topbar"><button class="icon-large mobile-menu" id="mobileMenu" aria-label="Открыть каналы">☰</button><span class="hash">#</span><strong id="channelTitle">общий</strong><span class="topic" id="topic">Общайся, играй и находи свою команду.</span><div class="top-actions"><button class="icon-large" id="searchOpen" title="Поиск сообщений">⌕</button><button class="icon-large" id="themeToggle" title="Переключить оформление">☼</button><button class="icon-large" id="authOpen" title="Войти или зарегистрироваться">♙</button><button class="icon-large" id="videoCall" title="Создать или открыть видеозвонок">📹</button><button class="icon-large" id="threads" title="Обсуждения">▤</button><button class="icon-large" id="toggleMembers" title="Участники">♙</button><button class="icon-large" id="invite" title="Пригласить">＋</button></div></header>
 <section class="messages" id="messages" aria-live="polite">
-<div class="welcome"><div class="welcome-icon">#</div><h1>Добро пожаловать в #общий!</h1><p>Это начало канала. Здесь начинается наше сообщество.</p></div>
+<div class="welcome"><div class="welcome-icon">★</div><h1>Добро пожаловать в STAR CHAT</h1><p>Твоя игровая база: общайся, собирай команду и участвуй в турнирах.</p></div><div class="feature-banner"><span class="feature-icon">⚔️</span><div><strong>Найди свою команду</strong><p>Обсуждай Rivals, ищи напарников и следи за турнирами.</p></div><button type="button" id="findTeam">Найти игроков</button></div>
 <div class="date-divider">25 октября 2026 г.</div>
 <div class="message"><div class="avatar">M</div><div class="msgbody"><div class="msghead"><strong>malo1w</strong><span class="time">Сегодня, 00:12</span></div><p>Всем привет! Добро пожаловать в STAR CHAT ✨</p></div></div>
 <div class="message"><div class="avatar" style="background:linear-gradient(135deg,#e879f9,#7c3aed)">R</div><div class="msgbody"><div class="msghead"><strong>RoyalBot</strong><span class="time">Сегодня, 00:13</span></div><p>Не забудь познакомиться с участниками и заглянуть в объявления 👋</p></div></div>
@@ -72,6 +88,7 @@ body{background:radial-gradient(ellipse at 70% -20%,#3b235c 0,transparent 48%),v
 </aside>
 </div>
 <div class="toast" id="toast" role="status"></div>
+<div class="search-backdrop" id="searchBackdrop"><div class="search-box" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><h2 id="searchTitle">⌕ Поиск по STAR CHAT</h2><input id="searchInput" placeholder="Сообщения, каналы, слова…" autocomplete="off"><div class="search-results" id="searchResults"><div class="empty">Начни вводить запрос.</div></div><div class="auth-actions"><button id="searchClose">Закрыть</button></div></div></div>
 <div class="auth-backdrop" id="authBackdrop"><div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle"><h2 id="authTitle">STAR CHAT</h2><p id="authDescription">Создай аккаунт или войди по имени и паролю.</p><label for="authUsername">Имя пользователя</label><input id="authUsername" maxlength="32" autocomplete="username" placeholder="Например, malo1w"><label for="authPassword">Пароль</label><input id="authPassword" type="password" minlength="8" autocomplete="current-password" placeholder="Не менее 8 символов"><div id="confirmPasswordWrap" style="display:none"><label for="authPasswordConfirm">Повтори пароль</label><input id="authPasswordConfirm" type="password" minlength="8" autocomplete="new-password" placeholder="Повтори пароль"></div><div class="auth-status" id="authStatus"></div><div class="auth-actions"><button id="authCancel">Закрыть</button><button id="authModeToggle">Зарегистрироваться</button><button id="authSubmit" class="primary">Войти</button><button id="authSignOut" style="display:none">Выйти из аккаунта</button></div></div></div>
 <div class="modal-backdrop" id="profileBackdrop"><div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileTitle"><h2 id="profileTitle">Настройка профиля</h2><p>Настрой свой профиль STAR CHAT — имя, ник, описание и аватар.</p><div class="profile-preview"><div class="avatar" id="profilePreviewAvatar">M</div><div><strong id="profilePreviewName">malo1w</strong><div style="font-size:12px;color:#c0b5d2" id="profilePreviewStatus">В сети</div></div></div><label for="editDisplayName">Отображаемое имя</label><input id="editDisplayName" maxlength="40" placeholder="Как тебя будут видеть"><label for="editUsername">Уникальный никнейм</label><input id="editUsername" maxlength="32" placeholder="malo1w"><label for="editBio">О себе</label><textarea id="editBio" maxlength="300" placeholder="Расскажи о себе, любимых играх и команде..."></textarea><label for="editStatus">Статус</label><input id="editStatus" maxlength="80" placeholder="Например: играю в Rivals 🎮"><label for="editAvatar">Аватарка (PNG, JPG, WEBP или GIF; до 5 МБ)</label><input id="editAvatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><div class="profile-status" id="profileStatus"></div><div class="profile-actions"><button id="profileCancel">Отмена</button><button id="profileSave" class="primary">Сохранить профиль</button></div></div></div><div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><h2 id="modalTitle">Создать</h2><p id="modalText">Настрой свой сервер.</p><input id="modalInput" maxlength="40" placeholder="Название"><div class="modal-actions"><button id="cancelModal">Отмена</button><button class="primary" id="confirmModal">Создать</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -85,6 +102,8 @@ const channelData={
 'знакомства':{topic:'Расскажи немного о себе и познакомься с участниками.',icon:'#'},
 'мемы':{topic:'Кидай мемы, клипы и игровые моменты.',icon:'#'},
 'объявления':{topic:'Важные новости сообщества.',icon:'#'},
+'поиск-команды':{topic:'Найди напарников для игры и собери состав.',icon:'#'},
+'турниры':{topic:'Турниры, результаты матчей и набор команд.',icon:'#'},
 'Лобби':{topic:'Голосовой канал · демонстрация интерфейса',icon:'🔊',voice:true},
 'Игровой отряд':{topic:'Голосовой канал · демонстрация интерфейса',icon:'🔊',voice:true}
 };
@@ -92,6 +111,8 @@ const initialMessages={
 'знакомства':[['RoyalBot','Добро пожаловать! Напиши, как тебя зовут и во что любишь играть.','R']],
 'мемы':[['NeonPhantom','Тут собираем лучшие моменты из Rivals 😂','N']],
 'объявления':[['malo1w','Добро пожаловать в STAR CHAT! Новости и события будут здесь.','M']],
+'поиск-команды':[['RoyalBot','Ищешь напарника? Напиши игру, роль и свой уровень. 🎮','R']],
+'турниры':[['RoyalBot','Здесь публикуются турниры, расписание матчей и результаты. 🏆','R']],
 'Лобби':[['RoyalBot','Это макет голосового канала. Реальная голосовая связь пока не подключена.','R']],
 'Игровой отряд':[['RoyalBot','Собираем пати на Rivals! Реальный голос пока не подключён.','R']]
 };
@@ -141,7 +162,12 @@ function addMessage(name,text,initial,store=true){
  const strong=document.createElement('strong');strong.textContent=name;
  const time=document.createElement('span');time.className='time';time.textContent='Сегодня, '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
  const para=document.createElement('p');para.textContent=text;
- head.append(strong,time);body.append(head,para);row.append(av,body);$('messages').append(row);
+ head.append(strong,time);body.append(head,para);
+ const tools=document.createElement('div');tools.className='message-tools';
+ [['👍','👍'],['❤️','❤️'],['😂','😂']].forEach(([label,value])=>{const b=document.createElement('button');b.type='button';b.className='reaction-btn';b.textContent=label+' 0';b.title='Поставить реакцию '+value;b.onclick=()=>{const active=b.classList.toggle('active');const n=Number(b.dataset.count||0)+(active?1:-1);b.dataset.count=String(n);b.textContent=label+' '+Math.max(0,n)};tools.append(b)});
+ const reply=document.createElement('button');reply.type='button';reply.className='reply-btn';reply.textContent='↩ Ответить';reply.onclick=()=>{$('messageInput').value='@'+name+' ';$('messageInput').focus();toast('Ответ на сообщение '+name)};tools.append(reply);
+ const copy=document.createElement('button');copy.type='button';copy.className='copy-btn';copy.textContent='⧉ Копировать';copy.onclick=async()=>{try{await navigator.clipboard.writeText(text);toast('Текст скопирован')}catch{toast('Не удалось скопировать текст')}};tools.append(copy);
+ body.append(tools);row.append(av,body);$('messages').append(row);
  if(store){stored[currentChannel]=stored[currentChannel]||[];stored[currentChannel].push([name,text,initial||name[0].toUpperCase()]);save()}
 }
 document.querySelectorAll('.channel').forEach(b=>b.addEventListener('click',()=>{renderChannel(b.dataset.channel);$('channelSidebar').classList.remove('mobile-open')}));
@@ -149,6 +175,27 @@ $('messageForm').addEventListener('submit',e=>{e.preventDefault();const value=$(
 $('messageInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('messageForm').requestSubmit()}});
 $('messageInput').addEventListener('input',()=>{$('messageInput').style.height='auto';$('messageInput').style.height=Math.min($('messageInput').scrollHeight,150)+'px'});
 $('mobileMenu').onclick=()=>$('channelSidebar').classList.toggle('mobile-open');
+
+$('searchOpen').onclick=()=>{$('searchBackdrop').classList.add('show');$('searchInput').focus()};
+$('searchClose').onclick=()=>$('searchBackdrop').classList.remove('show');
+$('searchBackdrop').onclick=e=>{if(e.target===$('searchBackdrop'))$('searchBackdrop').classList.remove('show')};
+$('searchInput').addEventListener('input',()=>{
+ const q=$('searchInput').value.trim().toLowerCase(),out=$('searchResults');out.innerHTML='';
+ if(!q){out.innerHTML='<div class="empty">Начни вводить запрос.</div>';return}
+ let found=0;
+ Object.entries({...initialMessages,...stored}).forEach(([channel,items])=>{
+  (items||[]).forEach(item=>{if(String(item[1]).toLowerCase().includes(q)||String(item[0]).toLowerCase().includes(q)||channel.toLowerCase().includes(q)){
+   const row=document.createElement('div');row.className='search-result';const meta=document.createElement('small');meta.textContent='#'+channel+' · '+item[0];const body=document.createElement('div');body.textContent=item[1];row.append(meta,body);row.onclick=()=>{$('searchBackdrop').classList.remove('show');if(channelData[channel])renderChannel(channel);toast('Открыт канал #'+channel)};out.append(row);found++;
+  }});
+ });
+ if(!found)out.innerHTML='<div class="empty">Ничего не найдено.</div>';
+});
+$('themeToggle').onclick=()=>{document.body.classList.toggle('light-mode');const light=document.body.classList.contains('light-mode');try{localStorage.setItem('star-chat-theme',light?'light':'dark')}catch{}toast(light?'Светлая тема включена':'Тёмная тема включена')};
+try{if(localStorage.getItem('star-chat-theme')==='light')document.body.classList.add('light-mode')}catch{}
+$('findTeam').onclick=()=>renderChannel('поиск-команды');
+$('openDm').onclick=()=>{const messages=$('messages');messages.innerHTML='';const card=document.createElement('div');card.className='dm-card';const h=document.createElement('h3');h.textContent='✉ Личные сообщения';const p=document.createElement('p');p.textContent='Здесь будет список личных диалогов. Сейчас можно начать с поиска игроков в канале #поиск-команды.';card.append(h,p);const b=document.createElement('button');b.className='send';b.style.marginTop='12px';b.textContent='Найти игроков';b.onclick=()=>renderChannel('поиск-команды');card.append(b);messages.append(card);$('channelTitle').textContent='Личные сообщения';$('topic').textContent='Приватное общение';document.querySelectorAll('.channel').forEach(x=>x.classList.toggle('active',x.id==='openDm'));$('channelSidebar').classList.remove('mobile-open')};
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('searchBackdrop').classList.add('show');$('searchInput').focus()}if(e.key==='Escape'){$('searchBackdrop').classList.remove('show')}});
+
 $('toggleMembers').onclick=()=>{const m=$('members');if(innerWidth<=1000){toast('Список участников доступен на широком экране')}else{m.style.display=m.style.display==='none'?'block':'none'}};
 $('invite').onclick=()=>{navigator.clipboard?.writeText(location.href).then(()=>toast('Ссылка на сайт скопирована')).catch(()=>toast('Скопируй ссылку из адресной строки'))||toast('Скопируй ссылку из адресной строки')};
 $('threads').onclick=()=>toast('Обсуждения появятся в следующем обновлении');
