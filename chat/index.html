@@ -72,7 +72,7 @@ body{background:radial-gradient(ellipse at 70% -20%,#3b235c 0,transparent 48%),v
 </aside>
 </div>
 <div class="toast" id="toast" role="status"></div>
-<div class="auth-backdrop" id="authBackdrop"><div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle"><h2 id="authTitle">Вход в STAR CHAT</h2><p>Введи почту аккаунта — мы отправим тебе одноразовый шестизначный код для входа.</p><label for="authEmail">Электронная почта</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"><div id="emailCodeWrap" style="display:none"><label for="authCode">Шестизначный код из письма</label><input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456"></div><div class="auth-status" id="authStatus"></div><div class="auth-actions"><button id="authCancel">Закрыть</button><button id="sendEmailCode" class="primary">Получить код</button><button id="verifyEmailCode" class="primary" style="display:none">Подтвердить код</button><button id="authSignOut" style="display:none">Выйти из аккаунта</button></div></div></div>
+<div class="auth-backdrop" id="authBackdrop"><div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle"><h2 id="authTitle">STAR CHAT</h2><p id="authDescription">Создай аккаунт или войди по имени и паролю.</p><label for="authUsername">Имя пользователя</label><input id="authUsername" maxlength="32" autocomplete="username" placeholder="Например, malo1w"><label for="authPassword">Пароль</label><input id="authPassword" type="password" minlength="8" autocomplete="current-password" placeholder="Не менее 8 символов"><div id="confirmPasswordWrap" style="display:none"><label for="authPasswordConfirm">Повтори пароль</label><input id="authPasswordConfirm" type="password" minlength="8" autocomplete="new-password" placeholder="Повтори пароль"></div><div class="auth-status" id="authStatus"></div><div class="auth-actions"><button id="authCancel">Закрыть</button><button id="authModeToggle">Зарегистрироваться</button><button id="authSubmit" class="primary">Войти</button><button id="authSignOut" style="display:none">Выйти из аккаунта</button></div></div></div>
 <div class="modal-backdrop" id="profileBackdrop"><div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileTitle"><h2 id="profileTitle">Настройка профиля</h2><p>Настрой свой профиль STAR CHAT — имя, ник, описание и аватар.</p><div class="profile-preview"><div class="avatar" id="profilePreviewAvatar">M</div><div><strong id="profilePreviewName">malo1w</strong><div style="font-size:12px;color:#c0b5d2" id="profilePreviewStatus">В сети</div></div></div><label for="editDisplayName">Отображаемое имя</label><input id="editDisplayName" maxlength="40" placeholder="Как тебя будут видеть"><label for="editUsername">Уникальный никнейм</label><input id="editUsername" maxlength="32" placeholder="malo1w"><label for="editBio">О себе</label><textarea id="editBio" maxlength="300" placeholder="Расскажи о себе, любимых играх и команде..."></textarea><label for="editStatus">Статус</label><input id="editStatus" maxlength="80" placeholder="Например: играю в Rivals 🎮"><label for="editAvatar">Аватарка (PNG, JPG, WEBP или GIF; до 5 МБ)</label><input id="editAvatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><div class="profile-status" id="profileStatus"></div><div class="profile-actions"><button id="profileCancel">Отмена</button><button id="profileSave" class="primary">Сохранить профиль</button></div></div></div><div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><h2 id="modalTitle">Создать</h2><p id="modalText">Настрой свой сервер.</p><input id="modalInput" maxlength="40" placeholder="Название"><div class="modal-actions"><button id="cancelModal">Отмена</button><button class="primary" id="confirmModal">Создать</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -174,52 +174,50 @@ $('videoCall').onclick=async()=>{
 };
 db.auth.onAuthStateChange((_event,session)=>{authUser=session?.user||null;updateAuthUi();if(authUser)loadProfile()});
 async function initAuth(){const {data}=await db.auth.getSession();authUser=data.session?.user||null;updateAuthUi();if(authUser)await loadProfile()}
+let authMode='login';
 function showAuth(){
  $('authStatus').textContent='';
  $('authBackdrop').classList.add('show');
  $('authSignOut').style.display=authUser?'inline-block':'none';
- $('authEmail').style.display=authUser?'none':'block';
- $('emailCodeWrap').style.display='none';
- $('sendEmailCode').style.display=authUser?'none':'inline-block';
- $('verifyEmailCode').style.display='none';
- $('authTitle').textContent=authUser?'Аккаунт подключён':'Вход в STAR CHAT по коду из почты';
+ $('authUsername').style.display=authUser?'none':'block';
+ $('authPassword').style.display=authUser?'none':'block';
+ $('confirmPasswordWrap').style.display=(!authUser&&authMode==='register')?'block':'none';
+ $('authModeToggle').style.display=authUser?'none':'inline-block';
+ $('authSubmit').style.display=authUser?'none':'inline-block';
+ $('authTitle').textContent=authUser?'Аккаунт подключён':(authMode==='register'?'Регистрация STAR CHAT':'Вход в STAR CHAT');
+ $('authDescription').textContent=authUser?'Ты вошёл в аккаунт.':'Используй имя пользователя и пароль. Пароль должен содержать не менее 8 символов.';
+ $('authSubmit').textContent=authMode==='register'?'Создать аккаунт':'Войти';
+ $('authModeToggle').textContent=authMode==='register'?'Уже есть аккаунт? Войти':'Зарегистрироваться';
 }
-$('sendEmailCode').onclick=async()=>{
- const email=$('authEmail').value.trim().toLowerCase();
+$('authModeToggle').onclick=()=>{authMode=authMode==='login'?'register':'login';showAuth()};
+$('authSubmit').onclick=async()=>{
+ const username=$('authUsername').value.trim();
+ const password=$('authPassword').value;
  $('authStatus').textContent='';
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ $('authStatus').textContent='Введи корректный адрес электронной почты.';return; }
- const btn=$('sendEmailCode');btn.disabled=true;btn.textContent='Отправляем…';
+ if(!/^[a-zA-Z0-9_-]{3,32}$/.test(username)){ $('authStatus').textContent='Имя: 3–32 символа, только латинские буквы, цифры, _ и -.';return; }
+ if(password.length<8){$('authStatus').textContent='Пароль должен быть не короче 8 символов.';return}
+ if(authMode==='register'&&password!==$('authPasswordConfirm').value){$('authStatus').textContent='Пароли не совпадают.';return}
+ const btn=$('authSubmit');btn.disabled=true;btn.textContent=authMode==='register'?'Создаём…':'Входим…';
  try{
-  const {error}=await db.auth.signInWithOtp({email,options:{shouldCreateUser:false}});
-  if(error)throw error;
-  $('authEmail').dataset.pendingEmail=email;
-  $('authEmail').disabled=true;
-  $('emailCodeWrap').style.display='block';
-  $('verifyEmailCode').style.display='inline-block';
-  btn.textContent='Отправить код повторно';
-  $('authStatus').textContent='Если аккаунт с этой почтой существует, код отправлен на '+email+'. Проверь также папку «Спам».';
- }catch(err){$('authStatus').textContent=err.message||'Не удалось отправить код.';btn.textContent='Получить код'}
- finally{btn.disabled=false}
-};
-$('verifyEmailCode').onclick=async()=>{
- const email=$('authEmail').dataset.pendingEmail||$('authEmail').value.trim().toLowerCase();
- const token=$('authCode').value.trim();
- $('authStatus').textContent='';
- if(!/^\d{6}$/.test(token)){ $('authStatus').textContent='Введи все 6 цифр из письма.';return; }
- const btn=$('verifyEmailCode');btn.disabled=true;btn.textContent='Проверяем…';
- try{
-  const {data,error}=await db.auth.verifyOtp({email,token,type:'email'});
-  if(error)throw error;
-  authUser=data.user||data.session?.user||null;
-  if(!authUser)throw new Error('Код принят, но аккаунт не найден. Попробуй ещё раз.');
-  const username=(email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g,'').slice(0,32)||('player_'+authUser.id.slice(0,6)));
-  const {error:profileError}=await db.from('chat_profiles').upsert({id:authUser.id,username,display_name:username},{onConflict:'id'});
-  if(profileError)console.warn('Profile:',profileError.message);
-  $('authBackdrop').classList.remove('show');
-  $('authEmail').disabled=false;$('authEmail').value='';$('authEmail').dataset.pendingEmail='';$('authCode').value='';
-  updateAuthUi();await loadProfile();toast('Вход по коду выполнен');
- }catch(err){$('authStatus').textContent=err.message||'Код не подошёл. Запроси новый и попробуй снова.'}
- finally{btn.disabled=false;btn.textContent='Подтвердить код'}
+  // Supabase Auth uses email/password internally; this reserved synthetic address keeps the UI username-only.
+  const email=username.toLowerCase()+'@users.starchat.invalid';
+  if(authMode==='register'){
+   const {data,error}=await db.auth.signUp({email,password,options:{data:{username,display_name:username}}});
+   if(error)throw error;
+   if(!data.session)throw new Error('Регистрация создана, но сервер требует подтверждение почты. В Supabase нужно выключить Confirm email в настройках Auth.');
+   authUser=data.user||data.session.user;
+   const {error:profileError}=await db.from('chat_profiles').upsert({id:authUser.id,username,display_name:username},{onConflict:'id'});
+   if(profileError)console.warn('Profile:',profileError.message);
+   $('authBackdrop').classList.remove('show');updateAuthUi();await loadProfile();toast('Аккаунт создан!');
+  }else{
+   const {data,error}=await db.auth.signInWithPassword({email,password});
+   if(error)throw new Error('Не удалось войти. Проверь имя и пароль. Если аккаунт создан раньше по почте, он не подойдёт для нового входа по имени.');
+   authUser=data.user||data.session?.user||null;
+   if(!authUser)throw new Error('Не удалось открыть аккаунт.');
+   $('authBackdrop').classList.remove('show');updateAuthUi();await loadProfile();toast('Вход выполнен!');
+  }
+ }catch(err){$('authStatus').textContent=err.message||'Не удалось выполнить действие.'}
+ finally{btn.disabled=false;btn.textContent=authMode==='register'?'Создать аккаунт':'Войти'}
 };
 function updateAuthUi(){
  const label=$('authLabel');if(label)label.textContent=authUser?(profileData.status||'В сети'):'Не вошёл';
