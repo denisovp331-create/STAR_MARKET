@@ -2,7 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#202225">
+<meta name="theme-color" content="#6d28d9">
+<meta name="description" content="STAR CHAT — фиолетовый чат для друзей, игровых команд и сообществ.">
+<link rel="manifest" href="app.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="STAR CHAT">
 <title>STAR CHAT — Community</title>
 <style>
 :root{color-scheme:dark;--bg:#313338;--sidebar:#2b2d31;--darker:#1e1f22;--panel:#232428;--line:#3f4147;--text:#f2f3f5;--muted:#b5bac1;--blurple:#5865f2;--green:#23a559}
@@ -394,6 +400,7 @@ $('addServer').onclick=()=>openModal('server','Создать сервер','П�
 $('addChannel').onclick=()=>openModal('channel','Создать канал','Название канала без символа #.');
 try{const n=localStorage.getItem('star-chat-name');if(n)$('profileName').textContent=n}catch{}
 renderChannel('общий');
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(err=>console.warn('PWA offline cache unavailable:',err))); }
 initAuth().then(()=>{
  if(callParam){$('voicePanel').classList.add('show');$('voiceState').textContent='Тебя пригласили в видеозвонок';$('voiceJoin').textContent='📹 Присоединиться';$('voiceJoin').onclick=()=>joinVoice(callParam,'video')}
 });
